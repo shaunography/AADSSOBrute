@@ -3,7 +3,7 @@ Python Secureworks Azure AD autologon Seamless SSO brute force POC based on http
 
 ## usage
 ```
-$ python3 AADSSOBrute.py -u username -p password.lst
+$ python3 AADSSOBrute.py -u username -p password.lst -d domain
 ```
 Both the username (-u) and password (-p) arguments can be either a single username/password or an absolute path to a file containing a list of usernames/passwords.
 

